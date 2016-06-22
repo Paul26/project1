@@ -3,9 +3,9 @@ services:
   phpserver:
     build: ./docker/php
     volumes:
-      - /Users/stringhamdb/Sandbox/project1/app:/var/www/html
-      - /Users/stringhamdb/Sandbox/project1/vendor:/var/www/vendor
-      - /Users/stringhamdb/Sandbox/project1/src:/var/www/src
+      - /Users/Paul/Documents/Sandbox/CS3620/project1/app:/var/www/html
+      - /Users/Paul/Documents/Sandbox/CS3620/project1/vendor:/var/www/vendor
+      - /Users/Paul/Documents/Sandbox/CS3620/project1/src:/var/www/src
     links:
       - mysqlserver
       - redisserver

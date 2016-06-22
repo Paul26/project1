@@ -1,3 +1,5 @@
+
+
 <?php
 /**
  * File name: index.php
@@ -23,6 +25,17 @@ $app->get('/', function () use ($app) {
 
 $app->get('/hello/{name}', function ($name) use ($app) {
     return '<p>Hello <b>' . $app->escape($name) . '</b></p>';
+});
+
+$app->get('/users', function () use ($app) {
+    $data = [
+        'count' => 2,
+        'users' => [
+            ['username' => 'joe00'],
+            ['username' => 'joe01']
+        ]
+    ];
+    return json_encode($data);
 });
 
 $app->run();
