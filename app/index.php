@@ -1,5 +1,3 @@
-
-
 <?php
 /**
  * File name: index.php
@@ -40,13 +38,10 @@ $app->get('/hello/{name}', function ($name) use ($app) {
     return '<p>Hello <b>' . $app->escape($name) . '</b></p>';
 });
 
-<<<<<<< HEAD
-=======
 $app->get('/server', function (Request $request) use ($app) {
     return '<h3>Web-server: ' . $request->server->get('SERVER_SOFTWARE') . '</h3>';
 });
 
->>>>>>> f35efa34255f661c406e9386bba8a5c2b20b24dd
 $app->get('/users', function () use ($app) {
     $data = [
         'count' => 2,
@@ -55,10 +50,7 @@ $app->get('/users', function () use ($app) {
             ['username' => 'joe01']
         ]
     ];
-<<<<<<< HEAD
-=======
 
->>>>>>> f35efa34255f661c406e9386bba8a5c2b20b24dd
     return json_encode($data);
 });
 
