@@ -1,12 +1,12 @@
 {
-  "name": "donbstringham/wsu-cs3620-project1",
+  "name": "PaulSheets-CS3620-project1",
   "description": "Project 1 (One)",
   "minimum-stability": "dev",
   "license": "MIT",
   "authors": [
     {
-      "name": "Don B. Stringham",
-      "email": "donbstringham@gmail.com"
+      "name": "Paul Sheets",
+      "email": "paulsheets26@gmail.com"
     }
   ],
   "autoload": {
