@@ -8,7 +8,7 @@
 
 namespace Project1\Domain;
 
-// TODO: the rest of CRUD, and use remove in reopository instead of delete
+// TODO: the rest of CRUD, and use remove in repository instead of delete
 
 interface UserRepository
 {

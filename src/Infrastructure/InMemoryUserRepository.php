@@ -22,7 +22,7 @@ class InMemoryUserRepository implements UserRepository
      */
     public function __construct()
     {
-        $this->storage =[];
+        $this->storage = [];
     }
 
     /**

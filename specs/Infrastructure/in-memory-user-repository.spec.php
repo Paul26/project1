@@ -18,7 +18,7 @@ describe('Project1\Infrastructure\InMemoryUserRepository', function () {
             );
         });
     });
-    // TODO: need to write add funtion for this test to work
+    // TODO: need to write add function for this test to work
     describe('->findByEmail("bill@gmail.com")', function() {
         it('should return a valid user object', function () {
             $repo = new InMemoryUserRepository();
