@@ -10,6 +10,7 @@ namespace Project1\Infrastructure;
 
 use Project1\Domain\StringLiteral;
 use Project1\Domain\UserRepository;
+use Project1\Domain\User;
 
 
 class InMemoryUserRepository implements UserRepository
@@ -69,4 +70,28 @@ class InMemoryUserRepository implements UserRepository
     {
         // TODO: Implement findByUsername() method.
     }
-}
+
+    public function addUser(StringLiteral $name, StringLiteral $email, StringLiteral $username) {
+        $newUser = new User($name, $email, $username);
+        array_push($this->storage, $newUser);
+    }
+
+    public function removeUser(StringLiteral $id) {
+       //  TODO:
+    }
+
+    public function updateUser(StringLiteral $name, StringLiteral $email, StringLiteral $username) {
+        if(!empty($name) && $name != '') {
+            //  update name
+        }
+
+        if(!empty($email) && $email != '') {
+            //  update email
+        }
+
+        if(!empty($username) && $username != '') {
+            //  update username
+        }
+    }
+
+}  //End InMemoryUserRepository class

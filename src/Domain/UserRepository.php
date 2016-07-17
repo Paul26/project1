@@ -36,4 +36,26 @@ interface UserRepository
      */
     public function findByUsername($username);
 
+    /**
+     * @param StringLiteral $name
+     * @param StringLiteral $email
+     * @param StringLiteral $username
+     * @return array
+     */
+    public function addUser(StringLiteral $name, StringLiteral $email, StringLiteral $username);
+
+    /**
+     * @param StringLiteral $id
+     * @return array
+     */
+    public function removeUser(StringLiteral $id);
+
+    /**
+     * @param StringLiteral $name
+     * @param StringLiteral $email
+     * @param StringLiteral $username
+     * @return array
+     */
+    public function updateUser(StringLiteral $name, StringLiteral $email, StringLiteral $username);
+
 }

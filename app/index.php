@@ -73,7 +73,7 @@ $app->get('/', function () use ($app) {
     return '<h1>Welcome to the Final Project Part 1</h1>';
 });
 
-$app->get('/users', function () use ($app, $users) {
+$app->get('/users/', function () use ($app, $users) {
     $response = new Response();
     $response->setStatusCode(200);
     $response->setContent(json_encode($users));
