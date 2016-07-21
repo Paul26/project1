@@ -1,6 +1,6 @@
 <?php
 /**
- * File name: InMemoryUserRepository.php
+ * File name: MysqlUserRepository.php
  * Project: project1
  * PHP version 5
  * @category  PHP
@@ -21,42 +21,52 @@ use Project1\Domain\User;
 use Project1\Domain\UserRepository;
 
 /**
- * Class InMemoryUserRepository
+ * Class MysqlUserRepository
  * @category  PHP
  * @package   Project1\Infrastructure
  * @author    donbstringham <donbstringham@gmail.com>
  * @link      http://donbstringham.us
  */
-class InMemoryUserRepository implements UserRepository
+class MysqlUserRepository implements UserRepository
 {
-    /** @var array */
-    protected $storage;
+    /** @var \PDO */
+    protected $driver;
 
     /**
-     * InMemoryUserRepository constructor
+     * MysqlUserRepository constructor
+     * @param \PDO $driver
      */
-    public function __construct()
+    public function __construct(\PDO $driver)
     {
-        $this->storage = [];
+        $this->driver = $driver;
     }
 
     /**
-     * @param \Project1\Domain\User $newUser
+     * @param \Project1\Domain\User $user
      * @return $this
      */
-    public function add(User $newUser)
+    public function add(User $user)
     {
-        $this->storage[] = $newUser;
-
-        return $this;
+        $stmt = $this->driver->exec("INSERT BLAH");
+        $this->driver->prepare($stmt);
+        $stmt->exec();
     }
 
     /**
-     * @return int
+     * @param \Project1\Domain\StringLiteral $id
+     * @return $this
      */
-    public function count()
+    public function delete(StringLiteral $id)
     {
-        return count($this->storage);
+        // TODO: Implement delete() method
+    }
+
+    /**
+     * @return array
+     */
+    public function findAll()
+    {
+        // TODO: Implement findAll() method
     }
 
     /**
@@ -65,16 +75,7 @@ class InMemoryUserRepository implements UserRepository
      */
     public function findByEmail(StringLiteral $fragment)
     {
-        $responseStorage = [];
-
-        /** @var \Project1\Domain\User $user */
-        foreach ($this->storage as $user) {
-            if ($fragment->equal($user->getEmail())) {
-                $responseStorage[] = $user;
-            }
-        }
-
-        return $responseStorage;
+        // TODO: Implement findByEmail() method
     }
 
     /**
@@ -83,14 +84,7 @@ class InMemoryUserRepository implements UserRepository
      */
     public function findById(StringLiteral $id)
     {
-        /** @var \Project1\Domain\User $user */
-        foreach($this->storage as $user) {
-            if ($id->equal($user->getId())) {
-                return $user;
-            }
-        }
-
-        return null;
+        // TODO: Implement findById() method
     }
 
     /**
@@ -112,26 +106,11 @@ class InMemoryUserRepository implements UserRepository
     }
 
     /**
-     * @param \Project1\Domain\StringLiteral $id
-     * @return $this
-     */
-    public function delete(StringLiteral $id)
-    {
-        for($i = 0; $i < $this->count(); $i++) {
-            if ($id->equal($this->storage[$i]->getId())) {
-                unset($this->storage[$i]);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return bool
      */
     public function save()
     {
-        return true;
+        // TODO: Implement save() method
     }
 
     /**
@@ -140,17 +119,6 @@ class InMemoryUserRepository implements UserRepository
      */
     public function update(User $user)
     {
-        $this->delete($user->getId());
-        $this->add($user);
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function findAll()
-    {
-        return $this->storage;
+        // TODO: Implement update() method
     }
 }

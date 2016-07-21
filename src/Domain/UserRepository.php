@@ -1,17 +1,40 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Paul
- * Date: 7/14/16
- * Time: 8:37 PM
+ * File name: UserRepository.php
+ * Project: project1
+ * PHP version 5
+ * @category  PHP
+ * @package   Project1\Domain
+ * @author    donbstringham <donbstringham@gmail.com>
+ * @copyright 2016 © donbstringham
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @version   GIT: <git_id>
+ * @link      http://donbstringham.us
+ * $LastChangedDate$
+ * $LastChangedBy$
  */
 
 namespace Project1\Domain;
 
-// TODO: the rest of CRUD, and use remove in repository instead of delete
-
 interface UserRepository
 {
+    /**
+     * @param \Project1\Domain\User $user
+     * @return $this
+     */
+    public function add(User $user);
+
+    /**
+     * @param \Project1\Domain\StringLiteral $id
+     * @return $this
+     */
+    public function delete(StringLiteral $id);
+
+    /**
+     * @return array
+     */
+    public function findAll();
+
     /**
      * @param StringLiteral $fragment
      * @return array
@@ -22,40 +45,28 @@ interface UserRepository
      * @param StringLiteral $id
      * @return \Project1\Domain\User
      */
-    public function findById($id);
+    public function findById(StringLiteral $id);
 
     /**
      * @param StringLiteral $fragment
      * @return array
      */
-    public function findByName($fragment);
+    public function findByName(StringLiteral $fragment);
 
     /**
      * @param StringLiteral $username
      * @return array
      */
-    public function findByUsername($username);
+    public function findByUsername(StringLiteral $username);
 
     /**
-     * @param StringLiteral $name
-     * @param StringLiteral $email
-     * @param StringLiteral $username
-     * @return array
+     * @return bool
      */
-    public function addUser(StringLiteral $name, StringLiteral $email, StringLiteral $username);
+    public function save();
 
     /**
-     * @param StringLiteral $id
-     * @return array
+     * @param \Project1\Domain\User $user
+     * @return $this
      */
-    public function removeUser(StringLiteral $id);
-
-    /**
-     * @param StringLiteral $name
-     * @param StringLiteral $email
-     * @param StringLiteral $username
-     * @return array
-     */
-    public function updateUser(StringLiteral $name, StringLiteral $email, StringLiteral $username);
-
+    public function update(User $user);
 }
