@@ -48,7 +48,7 @@ class InMemoryUserRepository implements UserRepository
     {
         $this->storage[] = $newUser;
 
-        return $this;
+        return $this;  //why returning $this????
     }
 
     /**
