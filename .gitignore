@@ -105,3 +105,10 @@ fabric.properties
 /web/css/
 /web/js/
 .idea/
+
+
+
+
+composer.lock
+specs/.DS_Store
+specs/Infrastructure/.DS_Store

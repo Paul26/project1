@@ -83,4 +83,18 @@ describe('Project1\Infrastructure\InMemoryUserRepository', function () {
             expect($user)->to->be->a('NULL');
         });
     });
+    describe('->findByName("bill")', function () {
+        it('should return a valid User object', function () {
+            $users = $this->repo->findByName(new StringLiteral('bill'));
+            expect($users)->to->be->an('array');
+            expect(1 === count($users))->to->be->true();
+        });
+    });
+    describe('->findByUsername("billharris")', function () {
+        it('should return a valid User object', function () {
+            $users = $this->repo->findByUsername(new StringLiteral('bharris'));
+            expect($users)->to->be->an('array');
+            expect(1 === count($users))->to->be->true();
+        });
+    });
 });
