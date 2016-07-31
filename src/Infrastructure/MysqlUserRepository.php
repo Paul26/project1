@@ -15,7 +15,6 @@
  */
 
 namespace Project1\Infrastructure;
-
 use Project1\Domain\StringLiteral;
 use Project1\Domain\User;
 use Project1\Domain\UserRepository;
@@ -41,15 +40,65 @@ class MysqlUserRepository implements UserRepository
         $this->driver = $driver;
     }
 
+    private function execSqlNoReturn(String $query)
+    {
+        try {
+            $this->driver->exec($query);
+        } catch (\PDOException $e) {
+            if ($e->getCode() === 1062) {
+                // TODO: Take some action if there is a key constraint violation, i.e. duplicate name
+            } else {
+                throw $e;
+            }
+        }
+    }
+
+    private function execSqlWithReturn(String $query, bool $fetchall)
+    {
+        $result = [];
+        try {
+            $stmt = $this->driver->query($query);
+            if($fetchall){
+                $result = $stmt->fetchAll();
+            }
+            else{
+                $result = $stmt->fetch();
+            }
+        } catch (\PDOException $e) {
+            if ($e->getCode() === 1062) {
+                // TODO: something
+            } else {
+                throw $e;
+            }
+        }
+        return $result;
+    }
+
+    private function createUserOrArray(String $query, bool $create)
+    {
+        $result = $this->execSqlWithReturn($query, false);
+        if($create) {
+            $user = new User(new StringLiteral($result["username"]),
+                    new StringLiteral($result["name"]),
+                    new StringLiteral($result["email"]));
+            return $user;
+        }
+        return $result;
+    }
+
     /**
      * @param \Project1\Domain\User $user
      * @return $this
+     * @throws \PDOException
      */
     public function add(User $user)
     {
-        $stmt = $this->driver->exec("INSERT BLAH");
-        $this->driver->prepare($stmt);
-        $stmt->exec();
+        $data = json_decode(json_encode($user));
+        $this->execSqlNoReturn('INSERT INTO users (email, name, username) VALUES ("'.$data->email.'", 
+                                                                                  "'.$data->name.'", 
+                                                                                  "'.$data->username.'");');
+        //echo "finally created successfully!";
+        return $this;
     }
 
     /**
@@ -58,7 +107,7 @@ class MysqlUserRepository implements UserRepository
      */
     public function delete(StringLiteral $id)
     {
-        // TODO: Implement delete() method
+        $this->execSqlNoReturn('DELETE FROM users WHERE id = '.$id.';');
     }
 
     /**
@@ -66,7 +115,9 @@ class MysqlUserRepository implements UserRepository
      */
     public function findAll()
     {
-        // TODO: Implement findAll() method
+        $all = $this->execSqlWithReturn("SELECT * FROM users", true);
+
+        return json_encode($all);
     }
 
     /**
@@ -75,7 +126,9 @@ class MysqlUserRepository implements UserRepository
      */
     public function findByEmail(StringLiteral $fragment)
     {
-        // TODO: Implement findByEmail() method
+        $query = 'SELECT id, email, name, username FROM users WHERE email = '.$fragment.';';
+
+        return $this->createUserOrArray($query, false);
     }
 
     /**
@@ -84,7 +137,9 @@ class MysqlUserRepository implements UserRepository
      */
     public function findById(StringLiteral $id)
     {
-        // TODO: Implement findById() method
+        $query = 'SELECT id, email, name, username FROM users WHERE id = '.$id.';';
+
+        return $this->createUserOrArray($query, true);
     }
 
     /**
@@ -93,7 +148,9 @@ class MysqlUserRepository implements UserRepository
      */
     public function findByName(StringLiteral $fragment)
     {
-        // TODO: Implement findByName() method
+        $query = 'SELECT id, email, name, username FROM users WHERE name = '.$fragment.';';
+
+        return $this->createUserOrArray($query, false);
     }
 
     /**
@@ -102,7 +159,9 @@ class MysqlUserRepository implements UserRepository
      */
     public function findByUsername(StringLiteral $username)
     {
-        // TODO: Implement findByUsername() method
+        $query = 'SELECT id, email, name, username FROM users WHERE username = '.$username.';';
+
+        return $this->createUserOrArray($query, false);
     }
 
     /**
@@ -110,7 +169,7 @@ class MysqlUserRepository implements UserRepository
      */
     public function save()
     {
-        // TODO: Implement save() method
+        return true;
     }
 
     /**
@@ -119,6 +178,7 @@ class MysqlUserRepository implements UserRepository
      */
     public function update(User $user)
     {
-        // TODO: Implement update() method
+        $this->delete($user->getId());
+        $this->add($user);
     }
 }

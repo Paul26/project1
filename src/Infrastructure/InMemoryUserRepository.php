@@ -107,7 +107,6 @@ class InMemoryUserRepository implements UserRepository
                 $responseStorage[] = $user;
             }
         }
-// TODO: -----------------------------------------------------
         return $responseStorage;
     }
 
@@ -125,7 +124,6 @@ class InMemoryUserRepository implements UserRepository
             }
         }
         return $responseStorage;
-        // TODO: -----------------------------------------------------
     }
 
     /**
