@@ -17,11 +17,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Pimple\Container;
 use Project1\Infrastructure\InMemoryUserRepository;
 use Project1\Infrastructure\MysqlUserRepository;
+use Project1\Infrastructure\RedisUserRepository;
 use Project1\Domain\StringLiteral;
 use Project1\Domain\User;
+
 require_once __DIR__ . '/../vendor/autoload.php';
+
 $dic = bootstrap();
 $app = $dic['app'];
+
 $app->before(function (Request $request) {
     $password = $request->getPassword();
     $username = $request->getUser();
@@ -40,9 +44,11 @@ $app->before(function (Request $request) {
         $request->request->replace(is_array($data) ? $data : array());
     }
 });
+
 $app->get('/', function () {
     return '<h1>Welcome to the Final Project</h1>';
 });
+
 $app->get('/ping', function() use ($dic) {
     $response = new Response();
     $driver = $dic['db-driver'];
@@ -52,7 +58,7 @@ $app->get('/ping', function() use ($dic) {
         $response->setContent(json_encode($msg));
         return $response;
     }
-    $repo = $dic['repo-mysql'];
+    $repo = $dic['repo-redis'];
     if (!$repo instanceof \Project1\Domain\UserRepository) {
         $response->setStatusCode(500);
         $msg = ['msg' => 'repository problem'];
@@ -64,16 +70,18 @@ $app->get('/ping', function() use ($dic) {
     $response->setContent(json_encode($msg));
     return $response;
 });
+
 $app->get('/users', function () use ($dic) {
     $response = new Response();
-    $repo = $dic['repo-mysql'];
+    $repo = $dic['repo-redis'];
     $response->setStatusCode(200);
     $response->setContent(json_encode($repo->findAll()));
     return $response;
 });
+
 $app->get('/users/{id}', function ($id) use ($dic) {
     $response = new Response();
-    $repo = $dic['repo-mysql'];
+    $repo = $dic['repo-redis'];
     $user = $repo->findById(new StringLiteral($id));
     if ($user === null) {
         $response->setStatusCode(404);
@@ -83,9 +91,10 @@ $app->get('/users/{id}', function ($id) use ($dic) {
     $response->setContent(json_encode($user));
     return $response;
 });
+
 $app->delete('/users/{id}', function ($id) use ($dic) {
     $response = new Response();
-    $repo = $dic['repo-mysql'];
+    $repo = $dic['repo-redis'];
     $result = $repo->delete(new StringLiteral($id));
     if ($result === false) {
         $response->setStatusCode(500);
@@ -94,9 +103,10 @@ $app->delete('/users/{id}', function ($id) use ($dic) {
     }
     return $response;
 });
+
 $app->post('/users', function (Request $request) use ($dic) {
     $response = new Response();
-    $repo = $dic['repo-mysql'];
+    $repo = $dic['repo-redis'];
     $email = $request->get('email');
     $name = $request->get('name');
     $username = $request->get('username');
@@ -114,13 +124,16 @@ $app->post('/users', function (Request $request) use ($dic) {
     }
     $newUser = new User(new StringLiteral($email), new StringLiteral($name),
         new StringLiteral($username));
+    $id = uniqid();  // used for redis
+    $newUser->setId(new StringLiteral($id)); //  used for redis
     $repo->add($newUser);
     $response->setStatusCode(201);
     return $response;
 });
+
 $app->put('/users/{id}', function ($id, Request $request) use ($dic) {
     $response = new Response();
-    $repo = $dic['repo-mysql'];
+    $repo = $dic['repo-redis'];
     $user = $repo->findById(new StringLiteral($id));
     if(empty($user) || $user == null) {
         $response->setStatusCode(400);
@@ -155,7 +168,9 @@ $app->put('/users/{id}', function ($id, Request $request) use ($dic) {
     $response->setStatusCode(200);
     return $response;
 });
+
 $app->run();
+
 function bootstrap()
 {
     $dic = new Container();
@@ -176,10 +191,12 @@ function bootstrap()
         ];
         return new PDO($dsn, $user, $pass, $opt);
     };
-    $pdo = $dic['db-driver'];
-    $dic['repo-mysql'] = function() use ($pdo) {
-        return new MysqlUserRepository($pdo);
-    };
+
+//    $pdo = $dic['db-driver'];
+//    $dic['repo-mysql'] = function() use ($pdo) {
+//        return new MysqlUserRepository($pdo);
+//    };
+
     $dic['redis-client'] = function() {
         return new Predis\Client([
             'scheme' => 'tcp',
@@ -187,6 +204,12 @@ function bootstrap()
             'port'   => 6379,
         ]);
     };
+
+    $pdo = $dic['redis-client'];
+    $dic['repo-redis'] = function() use ($pdo) {
+        return new RedisUserRepository($pdo);
+    };
+
     $dic['repo-mem'] = function() {
         $bill = new User(
             new StringLiteral('bill@email.com'),

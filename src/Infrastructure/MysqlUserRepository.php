@@ -29,6 +29,7 @@ class MysqlUserRepository implements UserRepository
 {
     /** @var \PDO */
     protected $driver;
+
     /**
      * MysqlUserRepository constructor
      * @param \PDO $driver
@@ -37,6 +38,7 @@ class MysqlUserRepository implements UserRepository
     {
         $this->driver = $driver;
     }
+
     private function execSqlNoReturn(String $query)
     {
         try {
@@ -49,6 +51,7 @@ class MysqlUserRepository implements UserRepository
             }
         }
     }
+
     private function execSqlWithReturn(String $query, bool $fetchall)
     {
         $result = [];
@@ -69,6 +72,7 @@ class MysqlUserRepository implements UserRepository
         }
         return $result;
     }
+
     private function createUserOrArray(String $query, bool $create)
     {
         $result = $this->execSqlWithReturn($query, false);
@@ -80,6 +84,7 @@ class MysqlUserRepository implements UserRepository
         }
         return $result;
     }
+
     /**
      * @param \Project1\Domain\User $user
      * @return $this
@@ -91,6 +96,7 @@ class MysqlUserRepository implements UserRepository
         $this->execSqlNoReturn('INSERT INTO users (username, name, email) VALUES ("'.$data->username.'", "'.$data->name.'", "'.$data->email.'");');
         return $this;
     }
+
     /**
      * @param \Project1\Domain\StringLiteral $id
      * @return $this
@@ -99,6 +105,7 @@ class MysqlUserRepository implements UserRepository
     {
         $this->execSqlNoReturn('DELETE FROM users WHERE id = '.$id.';');
     }
+
     /**
      * @return array
      */
@@ -107,6 +114,7 @@ class MysqlUserRepository implements UserRepository
         $all = $this->execSqlWithReturn('SELECT * FROM users', true);
         return json_encode($all);
     }
+
     /**
      * @param StringLiteral $fragment
      * @return array
@@ -116,6 +124,7 @@ class MysqlUserRepository implements UserRepository
         $query = 'SELECT id, email, name, username FROM users WHERE email = "'.$fragment.'";';
         return $this->createUserOrArray($query, false);
     }
+
     /**
      * @param StringLiteral $id
      * @return \Project1\Domain\User
@@ -126,6 +135,7 @@ class MysqlUserRepository implements UserRepository
         echo "";
         return $this->createUserOrArray($query, true);
     }
+
     /**
      * @param StringLiteral $fragment
      * @return array
@@ -135,6 +145,7 @@ class MysqlUserRepository implements UserRepository
         $query = 'SELECT id, email, name, username FROM users WHERE name = '.$fragment.';';
         return $this->createUserOrArray($query, false);
     }
+
     /**
      * @param StringLiteral $username
      * @return array
@@ -144,6 +155,7 @@ class MysqlUserRepository implements UserRepository
         $query = 'SELECT id, email, name, username FROM users WHERE username = '.$username.';';
         return $this->createUserOrArray($query, false);
     }
+
     /**
      * @return bool
      */
@@ -151,6 +163,7 @@ class MysqlUserRepository implements UserRepository
     {
         return true;
     }
+
     /**
      * @param \Project1\Domain\User $user
      * @return $this
