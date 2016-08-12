@@ -13,11 +13,13 @@
  * $LastChangedDate$
  * $LastChangedBy$
  */
+
 namespace Project1\Infrastructure;
+
 use Project1\Domain\StringLiteral;
 use Project1\Domain\User;
 use Project1\Domain\UserRepository;
-use system\S;
+
 /**
  * Class MysqlUserRepository
  * @category  PHP
@@ -39,46 +41,71 @@ class MysqlUserRepository implements UserRepository
         $this->driver = $driver;
     }
 
-    private function execSqlNoReturn(String $query)
-    {
-        try {
-            $this->driver->exec($query);
-        } catch (\PDOException $e) {
-            if ($e->getCode() === 1062) {
-                // TODO: something
-            } else {
-                throw $e;
-            }
-        }
-    }
-
-    private function execSqlWithReturn(String $query, bool $fetchall)
+    // For returning responses from the DB (SELECT)
+    /**
+     * @param String $query
+     * @param bool $all
+     */
+    private function fetchSelect(String $query, bool $all)
     {
         $result = [];
         try {
-            $stmt = $this->driver->query($query);
-            if($fetchall){
-                $result = $stmt->fetchAll();
+
+            $sql = $this->driver->query($query);
+            if($all){
+                $result = $sql->fetchAll();
             }
             else{
-                $result = $stmt->fetch();
+                $result = $sql->fetch();
             }
+
         } catch (\PDOException $e) {
+
             if ($e->getCode() === 1062) {
-                // TODO: something
+                //not sure here either
+                return;
             } else {
                 throw $e;
             }
         }
+        
         return $result;
     }
 
-    private function createUserOrArray(String $query, bool $create)
+    // This is for any SQL that isn't going to return something from the DB
+    /**
+     * @param String $query
+     */
+    private function runSql(String $query)
     {
-        $result = $this->execSqlWithReturn($query, false);
-        if($create) {
+        try {
+
+            $this->driver->exec($query);
+
+        } catch (\PDOException $e) {
+
+            if ($e->getCode() === 1062) {
+                //not sure what to do here
+                return;
+            } else {
+                throw $e;
+            }
+        }
+
+    }
+
+    // Can return either an array or a user based on the bool value
+    /**
+     * @param String $query
+     * @param bool $arr
+     * @return array|mixed|User|void
+     */
+    private function getUserData(String $query, bool $arr)
+    {
+        $result = $this->fetchSelect($query, false);
+        if(!$arr) {
             $user = new User(new StringLiteral($result["email"]),
-                new StringLiteral($result["name"]), new StringLiteral($result["username"]));
+                new StringLiteral($result["name"]), new StringLiteral($result["user_name"]));
             $user->setId($result["id"]);
             return $user;
         }
@@ -93,7 +120,10 @@ class MysqlUserRepository implements UserRepository
     public function add(User $user)
     {
         $data = json_decode(json_encode($user));
-        $this->execSqlNoReturn('INSERT INTO users (username, name, email) VALUES ("'.$data->username.'", "'.$data->name.'", "'.$data->email.'");');
+        $this->runSql(
+            'INSERT INTO Users (id, username, name, email) VALUES ("'.$data->id.'", "'.$data->username.'", 
+                "'.$data->name.'", "'.$data->email.'");'
+        );
         return $this;
     }
 
@@ -103,7 +133,7 @@ class MysqlUserRepository implements UserRepository
      */
     public function delete(StringLiteral $id)
     {
-        $this->execSqlNoReturn('DELETE FROM users WHERE id = '.$id.';');
+        $this->runSql('DELETE FROM Users WHERE id = ' .$id.';');
     }
 
     /**
@@ -111,7 +141,7 @@ class MysqlUserRepository implements UserRepository
      */
     public function findAll()
     {
-        $all = $this->execSqlWithReturn('SELECT * FROM users', true);
+        $all = $this->fetchSelect('SELECT * FROM Users', true);
         return json_encode($all);
     }
 
@@ -121,8 +151,8 @@ class MysqlUserRepository implements UserRepository
      */
     public function findByEmail(StringLiteral $fragment)
     {
-        $query = 'SELECT id, email, name, username FROM users WHERE email = "'.$fragment.'";';
-        return $this->createUserOrArray($query, false);
+        $query = 'SELECT id, email, name, username FROM Users WHERE email = "' .$fragment.'";';
+        return $this->getUserData($query, true);
     }
 
     /**
@@ -131,9 +161,8 @@ class MysqlUserRepository implements UserRepository
      */
     public function findById(StringLiteral $id)
     {
-        $query = 'SELECT id, email, name, username FROM users WHERE id = '.(string) $id.';';
-        echo "";
-        return $this->createUserOrArray($query, true);
+        $query = 'SELECT id, email, name, username FROM Users WHERE id = ' .(string) $id.';';
+        return $this->getUserData($query, false);
     }
 
     /**
@@ -142,8 +171,8 @@ class MysqlUserRepository implements UserRepository
      */
     public function findByName(StringLiteral $fragment)
     {
-        $query = 'SELECT id, email, name, username FROM users WHERE name = '.$fragment.';';
-        return $this->createUserOrArray($query, false);
+        $query = 'SELECT id, email, name, username FROM Users WHERE name = ' .$fragment.';';
+        return $this->getUserData($query, true);
     }
 
     /**
@@ -152,8 +181,8 @@ class MysqlUserRepository implements UserRepository
      */
     public function findByUsername(StringLiteral $username)
     {
-        $query = 'SELECT id, email, name, username FROM users WHERE username = '.$username.';';
-        return $this->createUserOrArray($query, false);
+        $query = 'SELECT id, email, name, username FROM Users WHERE username = ' .$username.';';
+        return $this->getUserData($query, true);
     }
 
     /**
@@ -161,6 +190,7 @@ class MysqlUserRepository implements UserRepository
      */
     public function save()
     {
+        // Since stuff is auto-committed to the DB I don't think this is used.
         return true;
     }
 
@@ -170,9 +200,11 @@ class MysqlUserRepository implements UserRepository
      */
     public function update(User $user)
     {
-        $query = 'UPDATE users SET email="'.$user->getEmail().'",
+        echo "MySQL update called.\n";
+        $query = 'UPDATE Users SET email="' .$user->getEmail().'",
         name="'.$user->getName().'", username="'.$user->getUsername().'" 
         WHERE id='.$user->getId().';';
-        return $this->execSqlNoReturn($query);
+        echo "MySQL update complete.\n";
+        return $this->runSql($query);
     }
 }

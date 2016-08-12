@@ -32,7 +32,6 @@ class RedisUserRepository implements UserRepository
 {
     /** @var \Predis\Client() */
     protected $client;
-
     /**
      * RedisUserRepository constructor
      * @param \Predis\Client $newClient
@@ -67,7 +66,7 @@ class RedisUserRepository implements UserRepository
      */
     public function findAll()
     {
-        foreach($this->client->keys('*') as $key) {
+        foreach($this->client->keys('*') as $key){
             $data[$key] = json_decode($this->client->get($key), true);
         }
         return $data;
@@ -79,12 +78,7 @@ class RedisUserRepository implements UserRepository
      */
     public function findByEmail(StringLiteral $fragment)
     {
-        return json_encode($this->client->get($fragment->toNative()));
-
-        //$json = $this->client->get($fragment->toNative());
-        //$data = json_decode($json, true);
-
-        //return $data;
+        return $this->client->get($fragment->toNative());
     }
 
     /**
@@ -96,9 +90,7 @@ class RedisUserRepository implements UserRepository
     {
         /** @var string $json */
         $json = $this->client->get($id->toNative());
-
         $data = json_decode($json, true);
-
         $user = new User(
             new StringLiteral($data['email']),
             new StringLiteral($data['name']),
@@ -115,12 +107,7 @@ class RedisUserRepository implements UserRepository
      */
     public function findByName(StringLiteral $fragment)
     {
-        return json_encode($this->client->get($fragment->toNative()));
-
-        //$json = $this->client->get($fragment->toNative());
-        //$data = json_decode($json, true);
-
-        //return $data;
+        return json_decode($this->client->get($fragment->toNative()));
     }
 
     /**
@@ -129,12 +116,7 @@ class RedisUserRepository implements UserRepository
      */
     public function findByUsername(StringLiteral $username)
     {
-        return json_encode($this->client->get($username->toNative()));
-
-        //$json = $this->client->get($username->toNative());
-        //$data = json_decode($json, true);
-
-        //return $data;
+        return json_decode($this->client->get($username->toNative()));
     }
 
     /**
@@ -151,9 +133,12 @@ class RedisUserRepository implements UserRepository
      */
     public function update(User $user)
     {
-        $this->delete(new StringLiteral($user->getId()));
-        $user->setId(new StringLiteral(uniqid()));
-        $this->add($user);
+        echo "Redis update called\n";
+        $userdata = array(json_decode($this->client->get($user->getId())));
+        $userdata['email'] = $user->getEmail();
+        $userdata['name'] = $user->getName();
+        $userdata['username'] = $user->getUsername();
+        $this->client->mset($user->getId(), json_encode($userdata));
         return $this;
     }
 }
